@@ -1,2 +1,1 @@
-# Dea10
-AndroidDuckHunt
+# AndroidDuckHunt

@@ -14,6 +14,8 @@ public class LoginActivity extends AppCompatActivity {
     public Button buttonStart;
     public String playerName;
 
+    public static final String EXTRA_NICK = "EXTRA_NICK";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +31,13 @@ public class LoginActivity extends AppCompatActivity {
 
     public void goToGameActivity(View view) {
         Intent intent = new Intent(this, GameActivity.class);
-        startActivity(intent);
+        playerName = editTextPlayerName.getText().toString();
+
+        if (playerName.isEmpty()) {
+            editTextPlayerName.setError("Add a player name");
+        } else {
+            intent.putExtra(EXTRA_NICK, playerName);
+            startActivity(intent);
+        }
     }
 }

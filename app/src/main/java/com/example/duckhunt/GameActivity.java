@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.Display;
 import android.view.View;
@@ -30,6 +31,19 @@ public class GameActivity extends AppCompatActivity {
 
     public Random random;
 
+    public void initCountDownTimer() {
+        new CountDownTimer(5000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                textViewTimer.setText(millisUntilFinished / 1000 + "s");
+            }
+
+            public void onFinish() {
+                textViewTimer.setText("0s");
+            }
+        }.start();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +54,7 @@ public class GameActivity extends AppCompatActivity {
 
         bindUI();
         initScreen();
+        initCountDownTimer();
     }
 
     @Override

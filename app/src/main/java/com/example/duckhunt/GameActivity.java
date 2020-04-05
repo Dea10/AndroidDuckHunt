@@ -1,5 +1,6 @@
 package com.example.duckhunt;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -9,10 +10,16 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Random;
 
@@ -34,6 +41,10 @@ public class GameActivity extends AppCompatActivity {
 
     public Random random;
 
+    public FirebaseFirestore db;
+
+    public final String TAG = GameActivity.class.getName();
+
     // *********** ANDROID METHODS ***********
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +53,8 @@ public class GameActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         playerName = intent.getStringExtra(LoginActivity.EXTRA_NICK);
+
+        db = FirebaseFirestore.getInstance();
 
         bindUI();
         initScreen();
@@ -122,6 +135,7 @@ public class GameActivity extends AppCompatActivity {
                 textViewTimer.setText("0s");
                 gameOver = true;
                 showGameOver();
+                sendDataToFirebase();
             }
         }.start();
     }
@@ -154,11 +168,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void resetGame() {
-        //reset gameOver
-        //reset huntedDucksCounter
-        //reset duck
-        //reset countDownTimer
-
         textViewCounter.setText("0");
         textViewTimer.setText("60s");
 
@@ -166,5 +175,20 @@ public class GameActivity extends AppCompatActivity {
         huntedDucksCounter = 0;
         resetDuck();
         initCountDownTimer();
+    }
+
+    public void sendDataToFirebase() {
+        UserPunctuation userPunctuation = new UserPunctuation(playerName, huntedDucksCounter);
+        db.collection("ranking").add(userPunctuation).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.w(TAG, "Error adding document", e);
+                }
+        });
     }
 }

@@ -2,6 +2,8 @@ package com.example.duckhunt;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -28,22 +30,11 @@ public class GameActivity extends AppCompatActivity {
     public Integer huntedDucksCounter = 0;
     public Integer screenWidth;
     public Integer screenHeight;
+    public Boolean gameOver = false;
 
     public Random random;
 
-    public void initCountDownTimer() {
-        new CountDownTimer(5000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                textViewTimer.setText(millisUntilFinished / 1000 + "s");
-            }
-
-            public void onFinish() {
-                textViewTimer.setText("0s");
-            }
-        }.start();
-    }
-
+    // *********** ANDROID METHODS ***********
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +45,7 @@ public class GameActivity extends AppCompatActivity {
 
         bindUI();
         initScreen();
+        resetDuck();
         initCountDownTimer();
     }
 
@@ -73,20 +65,36 @@ public class GameActivity extends AppCompatActivity {
         imageViewTimer = findViewById(R.id.imageViewTimer);
     }
 
+    // *********** GAME METHODS ***********
+
+    public void initScreen() {
+        // 1. Obtener el tamaño de la pantalla del dispositivo.
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth = size.x;
+        screenHeight = size.y;
+
+        // 2. Inicializar random
+        random = new Random();
+    }
+
     public void onDuckClicked(View view) {
-        huntedDucksCounter++;
-        textViewCounter.setText(String.valueOf(huntedDucksCounter));
+        if (!gameOver) {
+            huntedDucksCounter++;
+            textViewCounter.setText(String.valueOf(huntedDucksCounter));
 
-        // show hunted duck
-        imageViewDuck.setImageResource(R.drawable.duck_clicked);
+            // show hunted duck
+            imageViewDuck.setImageResource(R.drawable.duck_clicked);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                imageViewDuck.setImageResource(R.drawable.duck);
-                resetDuck();
-            }
-        }, 500);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    imageViewDuck.setImageResource(R.drawable.duck);
+                    resetDuck();
+                }
+            }, 500);
+        }
     }
 
     private void resetDuck() {
@@ -103,15 +111,60 @@ public class GameActivity extends AppCompatActivity {
         imageViewDuck.setY(randomY);
     }
 
-    public void initScreen() {
-        // 1. Obtener el tamaño de la pantalla del dispositivo.
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        screenWidth = size.x;
-        screenHeight = size.y;
+    public void initCountDownTimer() {
+        new CountDownTimer(5000, 1000) {
 
-        // 2. Inicializar random
-        random = new Random();
+            public void onTick(long millisUntilFinished) {
+                textViewTimer.setText(millisUntilFinished / 1000 + "s");
+            }
+
+            public void onFinish() {
+                textViewTimer.setText("0s");
+                gameOver = true;
+                showGameOver();
+            }
+        }.start();
+    }
+
+    public void showGameOver() {
+        // 1. Instantiate an <code><a href="/reference/android/app/AlertDialog.Builder.html">AlertDialog.Builder</a></code> with its constructor
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setPositiveButton("Restart", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                resetGame();
+            }
+        });
+        builder.setNegativeButton("Finish", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+                dialog.dismiss();
+                finish();
+            }
+        });
+
+        // 2. Chain together various setter methods to set the dialog characteristics
+        builder.setMessage("Ducks hunted: " + huntedDucksCounter).setTitle("Game Over");
+
+        // 3. Get the <code><a href="/reference/android/app/AlertDialog.html">AlertDialog</a></code> from <code><a href="/reference/android/app/AlertDialog.Builder.html#create()">create()</a></code>
+        AlertDialog dialog = builder.create();
+
+        dialog.show();
+    }
+
+    public void resetGame() {
+        //reset gameOver
+        //reset huntedDucksCounter
+        //reset duck
+        //reset countDownTimer
+
+        textViewCounter.setText("0");
+        textViewTimer.setText("60s");
+
+        gameOver = false;
+        huntedDucksCounter = 0;
+        resetDuck();
+        initCountDownTimer();
     }
 }

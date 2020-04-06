@@ -1,4 +1,4 @@
-package com.example.duckhunt;
+package com.example.duckhunt.firebaseModels;
 
 public class UserPunctuation {
 
@@ -27,5 +27,4 @@ public class UserPunctuation {
     public void setFinalScore(Integer finalScore) {
         this.finalScore = finalScore;
     }
-
 }
